@@ -31,17 +31,18 @@ def backprop(x, y, biases, weightsT, cost, num_layers):
     # Here you need to store all the activations of all the units
     # by feedforward pass
     pre_act = [np.zeros(b.shape) for b in biases]  # h^k
+    pre_act.insert(0, np.nan)
     activations = [np.zeros(b.shape) for b in biases]  # a^k
+    activations.insert(0, x)
 
-    pre_act[0] = np.matmul(weightsT[0], x) + biases[0]  # first activation is from input layer: x = h^(k-1) -> a^k
-    activations[0] = sigmoid(pre_act[0])  # hit activation layer with sigmoid function for each element h&
+    # pre_act[0] = np.matmul(weightsT[0], x) + biases[0]  # first activation is from input layer: x = h^(k-1) -> a^k
+    # activations[0] = sigmoid(pre_act[0])  # hit activation layer with sigmoid function for each element h
 
-    for i in range(1, num_layers - 1):  # use previous activations layer output as current layers inputs
+    for i in range(0, num_layers - 1):  # use previous activations layer output as current layers inputs
         # previous layers outputs to make new one   h^(k-1) -> a^k
-        pre_act[i] = np.matmul(weightsT[i], activations[i - 1]) + biases[i]
-
-        # hit activation layer with sigmoid function for each element: g(a^k) -> h^k
-        activations[i] = sigmoid(pre_act[i])
+        pre_act[i+1] = np.matmul(weightsT[i], activations[i]) + biases[i]
+        # # hit activation layer with sigmoid function for each element: g(a^k) -> h^k
+        activations[i+1] = sigmoid(pre_act[i+1])
     ###
 
     # compute the gradient of error respect to output
@@ -53,18 +54,21 @@ def backprop(x, y, biases, weightsT, cost, num_layers):
     # Here you need to implement the backward pass to compute the
     # gradient for each weight and bias
 
-    L_cost_prime = (1 - y) / (1 - activations[-1]) - y / activations[-1]
-    G = L_cost_prime
+    # first output layer ######$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    G = delta
+    nabla_b[-1] = G
+    nabla_wT[-1] = np.transpose(np.matmul(activations[-2], np.transpose(G)))
+    G = np.matmul(np.transpose(weightsT[-1]), G)
+    # Restart Algorithm
 
-    for k in range(num_layers - 2, 0, -1):  # stops at 1
-        G_new = np.multiply(G, sigmoid(pre_act[k]))
-        nabla_b[k] = G_new
-        nabla_wT[k] = np.multiply(activations[k - 1], np.transpose(G_new))
-        G = np.matmul(np.transpose(weightsT[k]), G_new)
+    for n in reversed(range(0, num_layers - 2)):
+        G = np.multiply(G, sigmoid_prime(pre_act[n+1]))
+        nabla_b[n] = G
+        nabla_wT[n] = np.transpose(np.matmul(activations[n], np.transpose(G)))
+        G = np.matmul(np.transpose(weightsT[n]), G)
 
-    G_new = np.multiply(G, sigmoid(pre_act[0]))
-    nabla_b[0] = G_new
-    nabla_wT[0] = np.multiply(activations[0], np.transpose(G_new))
+    # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
     ###
 
     return (nabla_b, nabla_wT)
