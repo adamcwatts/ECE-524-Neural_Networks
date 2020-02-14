@@ -53,9 +53,10 @@ def test_sigmoid():
 
 def gradient_check():
     train_data, valid_data, test_data = load_data()
-    model = network2.Network([784, 20, 10])
-    model.gradient_check(training_data=train_data, layer_id=1, unit_id=5, weight_id=3)   # original
-    # model.gradient_check(training_data=train_data, layer_id=1, unit_id=6, weight_id=3)  # modified
+    model = network2.Network([784, 20, 15, 10])  # modified
+    # model = network2.Network([784, 20, 10])  # original
+    model.gradient_check(training_data=train_data, layer_id=1, unit_id=3, weight_id=3)   # modified
+    # model.gradient_check(training_data=train_data, layer_id=1, unit_id=5, weight_id=3)  # original
 
 
 def main():
