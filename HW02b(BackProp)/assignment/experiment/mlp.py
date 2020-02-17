@@ -63,19 +63,75 @@ def main():
     # load train_data, valid_data, test_data
     train_data, valid_data, test_data = load_data()
     # construct the network
-    model = network2.Network([784, 20, 10])
+    model = network2.Network([784, 100,  10])
     # train the network using SGD
-    model.SGD(
+    epochs = 100
+    evaluation_cost, evaluation_accuracy, training_cost, training_accuracy = model.SGD(
         training_data=train_data,
-        epochs=100,
+        epochs=epochs,
         mini_batch_size=128,
         eta=1e-3,
-        lmbda = 0.0,
-        evaluation_data=valid_data,
+        lmbda = 0,
+        evaluation_data=test_data,
         monitor_evaluation_cost=True,
         monitor_evaluation_accuracy=True,
         monitor_training_cost=True,
         monitor_training_accuracy=True)
+    plotter(evaluation_cost, evaluation_accuracy, training_cost, training_accuracy)
+
+
+def plotter(val_cost, val_accuracy, train_cost, train_accuracy):
+    SMALL_SIZE = 20
+    MEDIUM_SIZE = 22
+    BIGGER_SIZE = 26
+    plt.rc('font', size=MEDIUM_SIZE)  # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)  # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
+    plt.rc('legend', fontsize=MEDIUM_SIZE)  # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+    epochs = len(val_cost)
+
+    # Training plots
+    fig, axe = plt.subplots(nrows=1, ncols=1, figsize=(10, 10))
+    axe.scatter(np.arange(0, epochs), train_cost)
+    axe.set_ylabel('Training Cost', labelpad=15)
+    axe.set_xlabel('Epochs', labelpad=15)
+    plt.tight_layout()
+    plt.savefig('training_cost.png')
+    plt.show()
+    # plt.close()
+
+    fig, axe = plt.subplots(nrows=1, ncols=1, figsize=(10, 10))
+    axe.scatter(np.arange(0, epochs), train_accuracy)
+    axe.set_ylabel('Training Accuracy', labelpad=15)
+    axe.set_xlabel('Epochs', labelpad=15)
+    axe.set_ylim((0, 3_000))
+    plt.tight_layout()
+    plt.savefig('training_acc.png')
+    plt.show()
+    # plt.close()
+
+    fig, axe = plt.subplots(nrows=1, ncols=1, figsize=(10, 10))
+    axe.scatter(np.arange(0, epochs), val_cost)
+    axe.set_ylabel('Validation Cost', labelpad=15)
+    axe.set_xlabel('Epochs', labelpad=15)
+    plt.tight_layout()
+    plt.savefig('valid_cost.png')
+    plt.show()
+    # plt.close()
+
+    fig, axe = plt.subplots(nrows=1, ncols=1, figsize=(10, 10))
+    axe.scatter(np.arange(0, epochs), val_accuracy)
+    axe.set_ylabel('Validation Accuracy', labelpad=15)
+    axe.set_xlabel('Epochs', labelpad=15)
+    axe.set_ylim((0, 10_000))
+    plt.tight_layout()
+    plt.savefig('valid_acc.png')
+    plt.show()
+    # plt.close()
 
 if __name__ == '__main__':
     FLAGS = get_args()
