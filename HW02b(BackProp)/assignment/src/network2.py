@@ -145,6 +145,9 @@ class Network(object):
         evaluation_cost, evaluation_accuracy = [], []
         training_cost, training_accuracy = [], []
         for j in range(epochs):
+            make_csv = False
+            if j == epochs - 1:
+                make_csv = True
             idxs = np.arange(n)
             random.shuffle(idxs)
             mini_batches = [
@@ -177,7 +180,7 @@ class Network(object):
                 accuracy = self.accuracy(evaluation_data)
                 evaluation_accuracy.append(accuracy)
                 print("[Validation accuracy]: {} / {}".format(
-                    self.accuracy(evaluation_data), n_data))
+                    self.accuracy(evaluation_data, final_test=make_csv), n_data))
             print
         return evaluation_cost, evaluation_accuracy, \
             training_cost, training_accuracy
@@ -241,7 +244,7 @@ class Network(object):
         delta_nabla_b, delta_nabla_wT = bp.backprop(x, y, self.biases, self.weightsT, self.cost, self.num_layers)
         return (delta_nabla_b, delta_nabla_wT)
 
-    def accuracy(self, data, convert=False):
+    def accuracy(self, data, convert=False, final_test=False):
         """Return the number of inputs in ``data`` for which the neural
         network outputs the correct result. The neural network's
         output is assumed to be the index of whichever neuron in the
@@ -264,6 +267,15 @@ class Network(object):
         mnist_loader.load_data_wrapper.
 
         """
+        if final_test:
+            # hot_encoded_answers = []
+            results = [(np.argmax(self.feedforward(x)), np.argmax(y))
+                       for (x, y) in zip(*data)]
+            hot_encoded_answers = np.zeros((10000, 10))
+            for i in range(10000):
+                hot_encoded_answers[i, :] = np.transpose(vectorized_result(results[i][0]))
+            np.savetxt("prediction.csv", hot_encoded_answers, delimiter=',')
+
         if convert:
             results = [(np.argmax(self.feedforward(x)), np.argmax(y))
                        for (x, y) in zip(*data)]
